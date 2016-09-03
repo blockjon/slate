@@ -5,8 +5,7 @@ language_tabs:
   - shell
 
 toc_footers:
-  - <a href="https://api.geofenceapi.org/ui/docs">V1 original documentation</a>
-  - <a href='https://api.geofenceapi.org/'>Visit the main site</a>
+  - <a href='https://api.geofenceapi.org/'>GeofenceAPI.org</a>
 
 includes:
   - errors
@@ -17,8 +16,6 @@ search: true
 # Introduction
 
 Welcome to the GeofenceAPI docs! You can use our API to create, modify, and query Geofences.
-
-Note: This documentation is still being written. [Slightly more complete documentation](https://api.geofenceapi.org/ui/docs) is available.
 
 Since this is a plain REST/JSON API, you can use GeofenceAPI from any language. You can view code plain curl examples in the dark area to the right, and then use that to write an integration from your programming language.
 
@@ -60,6 +57,70 @@ You must replace <code>YOURKEYHERE</code> with your API key.
 </aside>
 
 # Geofences
+
+## Overview
+
+A Geofence object is comprised of one or many <a href="http://geojson.org/" target="_blank">GeoJSON</a> polygons.
+
+The workflow for creating a geofence is as follows:
+
+1. Create the initial geofence
+2. Add GeoJSON polygons
+3. Compile the geofence
+4. Send queries to GeofenceAPI
+
+## Create a Geofence
+
+```shell
+curl 
+  -XPOST 
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
+  -d '{"name": "My new geofence"}'
+  'https://api.geofenceapi.org/v1/geofence'
+```
+
+> The above command returns JSON structured like this:
+
+```
+{
+  "id": "91047298638649434",
+  "name": "My new geofence"
+}
+```
+
+Callers shoud HTTP POST a JSON document containing a name key.
+
+## Update a Geofence
+
+```shell
+curl 
+  -XPUT 
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
+  -d '{
+  "name": "My updated name"
+}' 
+ 'https://api.geofenceapi.org/v1/geofence/91047298638649434'
+```
+
+This endpoint updates an existing Geofence.
+
+The format used is:
+
+`PUT https://api.geofenceapi.org/v1/geofence/<ID>`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+ID | The ID of the geofence to update
+
+### JSON Parameters
+
+Parameter | Description
+--------- | -----------
+name | The updated name
 
 ## Get a Specific Geofence
 
@@ -136,13 +197,231 @@ curl "https://api.geofenceapi.org/v1/geofence/91047298638649434"
 
 This endpoint retrieves a specific geofence.
 
-### HTTP Request
+## Delete a Geofence
 
-`GET https://api.geofenceapi.org/v1/geofence/<ID>`
+```shell
+curl 
+  -XDELETE 
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
+ 'https://api.geofenceapi.org/v1/geofence/91290730848360488'
+```
+
+This endpoint deletes an existing geofence and all of it's GeoJSON items.
+
+The format used is:
+
+`DELETE https://api.geofenceapi.org/v1/geofence/<ID>`
 
 ### URL Parameters
 
 Parameter | Description
 --------- | -----------
-ID | The ID of the geofence to retrieve
+ID | The ID of the geofence to delete
 
+## Compile a Geofence
+
+```shell
+curl 
+  -XPOST 
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
+  -d '{"geofence_id": "91047298638649434"}'
+  'https://api.geofenceapi.org/v1/geofence/recompilerequest'
+```
+
+The "compile" action examines each of the GeoJSON items attached to a Geofence, computes the areas of intersection, applies the merge strategy for the GeoJSON properties, and saves the results into a highly efficient format used for runtime queries. You must invoke the compilation command in order for geofence changes to be applied.
+
+### HTTP Request
+
+`POST https://api.geofenceapi.org/v1/geofence/recompilerequest`
+
+### JSON Parameters
+
+Parameter | Description
+--------- | -----------
+geofence_id | The ID of the geofence to compile
+
+# GeoJSON Items
+
+## Add a GeoJSON Item
+
+```shell
+curl 
+  -XPOST 
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
+  -d '{
+  "geofence_id": "91047298638649434",
+  "name": "My test GeoJSON item",
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -122.4540826678276,
+                37.77195292544332
+              ],
+              [
+                -122.45389759540556,
+                37.77103912851925
+              ],
+              [
+                -122.44077891111374,
+                37.77274374289986
+              ],
+              [
+                -122.44095057249069,
+                37.773608756061776
+              ],
+              [
+                -122.4540826678276,
+                37.77195292544332
+              ]
+            ]
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "foo": "bar"
+        }
+      }
+    ]
+  }
+}' 
+ 'https://api.geofenceapi.org/v1/geojsonitem'
+```
+
+This endpoint adds a new GeoJSON document on to the Geofence.
+
+When adding a new GeoJSON document, you specify the geofence ID, the level that the polygon should be bound to, and a name for reference.
+
+*level* refers to the z-index level that the polygon is attached to. This becomes useful when more than one polygon's area overlaps the same place. GeofenceAPI will merge the properties together of intersection polygons according to their level with properties on higher levels superceeding those on lower levels.
+
+## Update a GeoJSON Item
+
+```shell
+curl 
+  -XPUT 
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
+  -d '{
+  "name": "The GeoJSON item",
+  "level": 1,
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -122.4540826678276,
+                37.77195292544332
+              ],
+              [
+                -122.45389759540556,
+                37.77103912851925
+              ],
+              [
+                -122.44077891111374,
+                37.77274374289986
+              ],
+              [
+                -122.44095057249069,
+                37.773608756061776
+              ],
+              [
+                -122.4540826678276,
+                37.77195292544332
+              ]
+            ]
+          ]
+        },
+        "type": "Feature",
+        "properties": {
+          "foo": "bar"
+        }
+      }
+    ]
+  }
+}' 
+ 'https://api.geofenceapi.org/v1/geojsonitem/91290730848360488'
+```
+
+This endpoint updates an existing GeoJSON item.
+
+The format used is:
+
+`PUT https://api.geofenceapi.org/v1/geojsonitem/<ID>`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+ID | The ID of the geojsonitem to update
+
+### JSON Parameters
+
+Parameter | Description
+--------- | -----------
+name | The updated name
+level | The updated level integer
+geojson | The updated geojson
+
+## Delete a GeoJSON Item
+
+```shell
+curl 
+  -XDELETE 
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
+ 'https://api.geofenceapi.org/v1/geojsonitem/91290730848360488'
+```
+
+This endpoint deletes an existing GeoJSON item.
+
+The format used is:
+
+`DELETE https://api.geofenceapi.org/v1/geojsonitem/<ID>`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+ID | The ID of the geojsonitem to update
+
+# Queries
+
+> To create authorized curl requests, specify the AuthToken header:
+
+```shell
+# With shell, you can just pass the correct header with each request
+curl 
+-H "AuthToken: YOURPRIVATEKEYHERE" 
+-H "Content-type: application/json" 
+ "https://api.geofenceapi.org/v1/query/"\
+ "91047298638649434?lat=41.37955647644566"\
+ "&lng=-69.73571777347887"
+```
+
+> Make sure to replace `YOURPRIVATEKEYHERE` with your private API key and to replace the geofence id with one that's your own. The server will respond with soemthing like this:
+
+```json
+{
+  "payload": {
+    "localteam": "Red Sox"
+  }
+}
+```
+
+When the query point intersects one of the polygons, a 200 HTTP response code is returned with a JSON document containing a payload key. The payload value is the result of merging all of the GeoJSON properties together that intersected the query point.
+
+<aside class="notice">
+When the lat/lng query point does not intersect any polygon, a 404 HTTP response code is returned.
+</aside>
