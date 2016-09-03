@@ -3,13 +3,9 @@ title: API Reference
 
 language_tabs:
   - shell
-  - ruby
-  - python
-  - javascript
 
 toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/tripit/slate'>Documentation Powered by Slate</a>
+  - <a href='https://api.geofenceapi.org/'>Visit the main site</a>
 
 includes:
   - errors
@@ -19,171 +15,131 @@ search: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database...
+Welcome to the GeofenceAPI docs! You can use our API to create, modify, and query Geofences.
 
-We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+Since this is a plain REST/JSON API, you can use GeofenceAPI from any language. You can view code plain curl examples in the dark area to the right, and then use that to write an integration from your programming language.
 
-This example API documentation page was created with [Slate](https://github.com/tripit/slate). Feel free to edit it and use it as a base for your own API's documentation.
+# Content Type
 
-# Authentication
-
-> To authorize, use this code:
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
+> To create properly formed requests, always specify application/json via header:
 
 ```shell
 # With shell, you can just pass the correct header with each request
-curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
+curl -H "Content-type: application/json"
 ```
 
-```javascript
-const kittn = require('kittn');
+Callers should always specify the content type as "application/json" in all api calls.
 
-let api = kittn.authorize('meowmeowmeow');
+
+# Authentication
+
+> To create authorized curl requests, specify the AuthToken header:
+
+```shell
+# With shell, you can just pass the correct header with each request
+curl -H "AuthToken: YOURKEYHERE"
 ```
 
-> Make sure to replace `meowmeowmeow` with your API key.
+> Make sure to replace `YOURKEYHERE` with your API key.
 
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
+GeofenceAPI uses API keys to allow access to the API. There are two types of API Keys - public and private. In order to access your keys, log in to our [management console](https://api.geofenceapi.org/ui/login) and then click on "API Keys" from the drop down menu in the top right. 
 
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
+*Unregistered Users:* If you do not yet have an account, simply click the "Create Geofence" button on the main page. An account is automatically generated.
 
-`Authorization: meowmeowmeow`
+Private keys allow you to create and modify geofences via the API. Public Keys are used to query geofences via the API.
+
+GeofenceAPI expects for the API key to be included in all API requests to the server in a header that looks like the following:
+
+`AuthToken: YOURKEYHERE`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>YOURKEYHERE</code> with your API key.
 </aside>
 
-# Kittens
+# Geofences
 
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
+## Get a Specific Geofence
 
 ```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
-```
-
-> The above command returns JSON structured like this:
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
-```
-
-This endpoint retrieves all kittens.
-
-### HTTP Request
-
-`GET http://example.com/api/kittens`
-
-### Query Parameters
-
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
-
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
+curl "https://api.geofenceapi.org/v1/geofence/91047298638649434"
+  -H "Content-type: application/json"
+  -H "AuthToken: YOURPRIVATEKEYHERE"
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
 {
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+  "id": "91047298638649434", 
+  "name": "Default",
+  "bounding_box": [
+    -122.55523681640625, 
+    37.640334898059486, 
+    -122.33276367187499, 
+    37.80761398306056
+  ], 
+  "compilation_failed": false, 
+  "compilation_state": "fresh", 
+  "created_at": "2016-09-02 01:30:01.176188-07:00", 
+  "geojson_items": [
+    {
+      "id": "91290730848360488", 
+      "level": 0, 
+      "name": "My First Geofence",
+      "created_at": "2016-09-02 17:14:39.663457-07:00", 
+      "geojson": {
+        "features": [
+          {
+            "geometry": {
+              "coordinates": [
+                  [
+                    [
+                        -122.55523681640625, 
+                        37.640334898059486
+                    ], 
+                    [
+                        -122.55523681640625, 
+                        37.80761398306056
+                    ], 
+                    [
+                        -122.33276367187499, 
+                        37.80761398306056
+                    ], 
+                    [
+                        -122.33276367187499, 
+                        37.640334898059486
+                    ], 
+                    [
+                        -122.55523681640625, 
+                        37.640334898059486
+                    ]
+                ]
+              ], 
+              "type": "Polygon"
+            }, 
+            "properties": {
+                "hello": "world"
+            }, 
+            "type": "Feature"
+          }
+        ], 
+        "type": "FeatureCollection"
+      }
+    }
+  ]
 }
+
 ```
 
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+This endpoint retrieves a specific geofence.
 
 ### HTTP Request
 
-`GET http://example.com/kittens/<ID>`
+`GET https://api.geofenceapi.org/v1/geofence/<ID>`
 
 ### URL Parameters
 
 Parameter | Description
 --------- | -----------
-ID | The ID of the kitten to retrieve
+ID | The ID of the geofence to retrieve
 
