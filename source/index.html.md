@@ -5,6 +5,7 @@ language_tabs:
   - shell
 
 toc_footers:
+  - <a href="https://api.geofenceapi.org/ui/docs">V1 original documentation</a>
   - <a href='https://api.geofenceapi.org/'>Visit the main site</a>
 
 includes:
@@ -16,6 +17,8 @@ search: true
 # Introduction
 
 Welcome to the GeofenceAPI docs! You can use our API to create, modify, and query Geofences.
+
+Note: This documentation is still being written. [Slightly more complete documentation](https://api.geofenceapi.org/ui/docs) is available.
 
 Since this is a plain REST/JSON API, you can use GeofenceAPI from any language. You can view code plain curl examples in the dark area to the right, and then use that to write an integration from your programming language.
 
